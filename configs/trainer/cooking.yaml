@@ -1,0 +1,7 @@
+defaults:
+  - default
+
+min_epochs: 20
+max_epochs: 20
+devices: 8
+accumulate_grad_batches: 4

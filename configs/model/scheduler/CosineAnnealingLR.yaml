@@ -1,0 +1,4 @@
+name: CosineAnnealingLR
+T_max: 100
+eta_min: 1.0e-6
+warmup_steps: 0

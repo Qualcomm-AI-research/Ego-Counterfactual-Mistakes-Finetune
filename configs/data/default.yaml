@@ -1,0 +1,75 @@
+_target_: data
+
+
+dataset:
+  name: combined_dataset
+  dataset_list:
+    - _target_: CaptainCook4DInstruct
+      captaincook4d_root: ${data_paths.captaincook4d_root}
+      annotation_source: hf
+      annotation_repo_id: qualcomm/qualcomm-interactive-cooking-dataset
+      annotation_set: main
+      split: train
+      include_recipe_in_prompt: false
+      temporal_jitter_prob: 0.75
+      temporal_jitter_amount_instructions: 30.0
+      temporal_jitter_amount_feedbacks: 5.0
+      feedback_vs_success_pref_weight: 2.0
+      max_number_of_output_frames: 200
+    - _target_: Ego4DGoalStepInstruct
+      ego4d_root: ${data_paths.ego4d_root}
+      split: train
+      temporal_jitter_prob: 0.75
+      temporal_jitter_amount: 30.0
+      videos_to_frames_cache_file_path: ${data_paths.ego4d_videos_to_frames_cache}
+      max_num_frames_to_sample: 200
+    - _target_: EgoCoMist
+      repo_id: qualcomm/qualcomm-interactive-cooking-dataset-counterfactual-mistakes
+      captaincook4d_root: ${data_paths.captaincook4d_root}
+      ego4d_root: ${data_paths.ego4d_root}
+      egoexo4d_root: ${data_paths.egoexo4d_root}
+      split: train
+      dataset_extracted_fps: 2
+      max_number_of_output_frames: 200
+      temporal_jitter_prob: 0.75
+      temporal_jitter_amount_instructions: 30.0
+      temporal_jitter_amount_feedbacks: 5.0
+      error_type_sampling_weights:
+        technique_error: 0.35
+        preparation_error: 0.35
+        measurement_error: 0.1
+        temperature_error: 0.1
+        timing_error: 0.1
+
+  probabilities:
+    - 0.30 
+    - 0.10 
+    - 0.60 
+  # Exact training samples per epoch. Validation/test sizes are derived from
+  # create_train_val_test_split without subtracting from this train length.
+  train_length: 80000
+
+
+collate_fn:
+  image_size: 224
+  frame_transforms:
+    - height: 224
+      width: 224
+      keep_aspect_ratio: false
+  max_frames: 200
+  # Memory safety cap copied from the legacy Qwen3-VL collator. This is not
+  # uniform subsampling: after jittering the temporal window, every retained
+  # 2 fps frame is used, but very long windows keep only the most recent 200
+  # frames to avoid visual-token OOMs. Set to null or <=0 to disable.
+  max_streaming_frames: 200
+  max_text_length: 1024
+  num_of_feats_per_frame: ${model.net.num_of_feats_per_frame}
+  num_of_frames_per_sec: ${model.net.num_of_frames_per_sec}
+  vision_encoder_feat_reduction_factor: ${model.net.vision_encoder_feat_reduction_factor}
+
+create_train_val_test_split: [0.98, 0.01, 0.01]
+
+batch_size: 8
+num_workers: 16
+pin_memory: true
+persistent_workers: false

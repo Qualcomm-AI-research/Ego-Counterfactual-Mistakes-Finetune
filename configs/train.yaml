@@ -1,0 +1,22 @@
+# @package _global_
+
+defaults:
+  - _self_
+  - paths: default
+  - data: default
+  - model: default
+  - pipeline: default
+  - trainer: default
+  - callbacks: default
+  - experiment: null
+  - hydra: default
+
+task_name: train
+experiment_name: none
+job_name: train-noname
+tags: [dev]
+seed: 42
+auto_resume: false
+ckpt_path: null
+is_non_lora_ckpt: true
+export_fp32_weights: false

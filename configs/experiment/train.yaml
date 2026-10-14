@@ -1,0 +1,65 @@
+# @package _global_
+
+defaults:
+  - override /data: default # only_captaincook4d / only_cc also available
+  - override /model: qwen3p5_2b_lora #qwen3p5_0p8b_lora #
+  - override /pipeline: default
+  - override /callbacks: default
+  - override /paths: default
+  - override /trainer: cooking
+  - override /model/optimizer: DeepSpeedCPUAdam
+  - override /model/scheduler: CosineAnnealingLR
+  - override /trainer/strategy@trainer.strategy: ds-st3-bfloat16-no-opt-state-speed
+
+experiment_name: cooking_stage2_train_eccv_qwen3p5
+tags: [cooking-finetuning]
+auto_resume: false
+is_non_lora_ckpt: true
+
+trainer:
+  use_distributed_sampler: true
+  # Spend GPU memory for throughput: larger microbatches and no activation recompute.
+  accumulate_grad_batches: 4
+  strategy:
+    config:
+      train_micro_batch_size_per_gpu: 1
+      activation_checkpointing:
+        partition_activations: false
+        contiguous_memory_optimization: false
+        cpu_checkpointing: false
+        number_checkpoints: null
+        synchronize_checkpoint_boundary: false
+
+model:
+  gradient_checkpointing: false
+  oom_debug_enabled: false
+  oom_debug_log_every_n_steps: 100
+  oom_debug_rank_zero_only: true
+  oom_debug_log_cuda_memory: false
+  oom_debug_sync_cuda: false
+
+callbacks:
+  model_checkpoint:
+    # Keep more checkpoints during training than the default single best.
+    save_top_k: 20
+
+job_name: release_all # relase_only_captaincook4d #release_only_cc_debug #
+
+# Hugging Face cache location. Applied to the process environment by run.py
+# before any HF library is imported. Only HF_HOME is needed: huggingface_hub
+# and datasets derive hub/, datasets/, assets/ from it. Left null here; set it
+# on the command line, e.g. python scripts/run.py experiment=train \
+# hf_env.HF_HOME=$HF_CACHE_PATH (see README).
+hf_env:
+  HF_HOME: null
+
+# Dataset roots referenced by the data configs (configs/data/all.yaml,
+# configs/data/only_cc.yaml). Centralized here so paths live with the
+# experiment rather than the shared data configs. Left null here; set each on
+# the command line, e.g. python scripts/run.py experiment=train \
+# data_paths.captaincook4d_root=$CAPTAINCOOK4D_PATH ... (see README).
+data_paths:
+  captaincook4d_root: null
+  ego4d_root: null
+  ego4d_videos_to_frames_cache: null
+  egoexo4d_root: null

@@ -1,0 +1,55 @@
+# PyCharm
+.idea
+
+# VSCode
+.vscode
+
+# MAC OS
+.DS_Store
+
+# pytest
+.coverage
+.pytest
+.pytest_cache
+
+# Python
+*__pycache__*
+*.py[cod]
+*.cpython-36.pyc
+*.egg-info
+
+# IDM
+docker/requirements-local.txt
+
+# Patches (not to be committed by mistake)
+*.patch
+
+# LSF tests
+tests_cluster/logs
+
+# Log Folders
+outputs
+predicted_cooking_interactive_feedbacks
+predicted_cooking_interactive_feedbacks_release
+
+# Released checkpoint (download from GitHub release; not committed)
+ckpt
+
+# Local-only files (not part of the public release)
+CODE_REVIEW.md
+train.sh
+eval.sh
+post_prep_docker.sh
+runai_post_install_entrypoint.sh
+scripts/export_zero_checkpoint.sh
+
+# Local-only configs (debug / alternative mixtures)
+configs/data/cooking_eval_qualcomm_hf_qwen3p5.yaml
+configs/data/only_captaincook4d.yaml
+configs/data/only_cc.yaml
+configs/experiment/cooking_stage2_turn_based_eval_qwen3p5.yaml
+configs/model/qwen3p5_0p8b_lora.yaml
+
+# Unused dataset loaders (kept locally only)
+src/datasets/eccv/
+src/datasets/egoexo4d/

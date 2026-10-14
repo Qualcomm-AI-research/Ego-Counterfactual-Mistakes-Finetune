@@ -1,0 +1,18 @@
+accelerate>=1.13
+deepspeed>=0.18
+# Supplies the gated-delta-rule Triton kernels that the Qwen3.5 hybrid-attention
+# fast path needs (fla.ops.gated_delta_rule). Installed without the [cuda] extra
+# on purpose: from 0.5 onwards a bare install no longer pulls torch/triton, so
+# the base image's torch stays in place and the causal-conv1d extension compiled
+# against it is not invalidated. Hence the >=0.5.2 floor.
+flash-linear-attention>=0.5.2
+hydra-core>=1.3
+omegaconf>=2.3
+peft>=0.18
+pillow>=11.0
+transformers==5.2.0
+tqdm>=4.66
+huggingface-hub
+opencv-python
+bert_score
+rouge_score

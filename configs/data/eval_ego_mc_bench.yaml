@@ -1,0 +1,30 @@
+_target_: data
+
+dataset:
+  _target_: qualcomm_interactive_cooking_hf.EgoMCBench
+  name: ego_mc_bench
+  repo_id: qualcomm/qualcomm-interactive-cooking-dataset-ego-mistake-corrections
+  split: test
+  dataset_extracted_fps: 2
+  max_videos: null
+  frames_root: ${data_paths.ego_mc_bench_frames_root}
+  frame_cache_dir: ${paths.work_dir}/outputs/cache/qualcomm_interactive_cooking_frames
+
+collate_fn:
+  image_size: 224
+  frame_transforms:
+    - _target_: streaming_vlms.preprocess.ResizePIL
+      height: 224
+      width: 224
+      keep_aspect_ratio: false
+  max_frames: 16
+  max_text_length: 1024
+  num_of_feats_per_frame: ${model.net.num_of_feats_per_frame}
+  num_of_frames_per_sec: ${model.net.num_of_frames_per_sec}
+  vision_encoder_feat_reduction_factor: ${model.net.vision_encoder_feat_reduction_factor}
+
+batch_size: 1
+num_workers: 4
+pin_memory: true
+persistent_workers: false
+create_train_val_test_split: [0.0, 0.0, 1.0]

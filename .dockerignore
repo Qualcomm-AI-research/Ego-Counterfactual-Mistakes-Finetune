@@ -1,0 +1,10 @@
+.git
+outputs
+predicted_cooking_interactive_feedbacks
+predicted_cooking_interactive_feedbacks_release
+ckpt
+**/__pycache__
+*.py[cod]
+*.egg-info
+.pytest_cache
+.coverage

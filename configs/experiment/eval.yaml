@@ -1,0 +1,84 @@
+# @package _global_
+
+defaults:
+  - override /data: eval_ego_mc_bench
+  - override /model: qwen3p5_2b_lora
+  - override /pipeline: default
+  - override /callbacks: default
+  - override /paths: default
+  - override /trainer: default
+  - override /model/optimizer: DeepSpeedCPUAdam
+  - override /model/scheduler: CosineAnnealingLR
+  - override /trainer/strategy@trainer.strategy: ds-st3-bfloat16-no-opt-state-speed
+
+experiment_name: cooking_stage2_turn_based_eval_qwen3p5
+job_name: cooking_eval_qwen3p5_latest
+task_name: eval
+tags: [cooking-eval]
+auto_resume: false
+
+ckpt_path: ./ckpt/pytorch_model.bin
+
+train: false
+test: true
+load_weights_only: true
+is_non_lora_ckpt: false
+
+trainer:
+  use_distributed_sampler: false
+
+model:
+  gradient_checkpointing: false
+  net:
+    gradient_checkpointing: false
+
+evaluator:
+  name: vision-language-evaluator
+  evaluator_type: cooking_simple_monolithic_interactive_response
+  evaluator_kwargs:
+    model_type: ${model.net.model_type}
+    num_of_feats_per_frame: ${model.net.num_of_feats_per_frame}
+    num_of_frames_per_sec: ${model.net.num_of_frames_per_sec}
+    tokenizer: ${model.tokenizer}
+    resume_from_file: ./ckpt/results.json
+    turn_based_eval: true
+    use_cache: true
+    frame_transforms:
+      - height: 224
+        width: 224
+        keep_aspect_ratio: false
+    special_tokens_list:
+      - <|im_start|>
+      - <|image_pad|>
+      - <|im_end|>
+      - <|vision_start|>
+      - <|vision_end|>
+      - assistant
+      - user
+    score_types:
+      - rouge
+      - meteor
+      - bert
+    save_predictions: true
+    predictions_save_path: ${evaluator.evaluator_kwargs.resume_from_file}
+    prediction_format: legacy_turn_based
+    max_response_length: 64
+    max_eval_samples: null
+    max_eval_frames: null
+    max_gap_between_responses: 360
+    response_logit_threshold: -0.30
+
+# Hugging Face cache location. Applied to the process environment by run.py
+# before any HF library is imported. Only HF_HOME is needed: huggingface_hub
+# and datasets derive hub/, datasets/, assets/ from it. Left null here; set it
+# on the command line, e.g. python scripts/run.py experiment=eval \
+# hf_env.HF_HOME=$HF_CACHE_PATH (see README).
+hf_env:
+  HF_HOME: null
+
+# Dataset roots referenced by the eval data config
+# (configs/data/cooking_eval_qualcomm_hf_qwen3p5.yaml). Leave null to let the
+# loader download the HF dataset and extract frames; set to a directory of
+# pre-extracted frames to reuse them (see eval.sh).
+data_paths:
+  ego_mc_bench_frames_root: null

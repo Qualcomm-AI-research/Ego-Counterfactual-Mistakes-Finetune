@@ -1,0 +1,29 @@
+defaults:
+  - _self_
+  - optimizer: DeepSpeedCPUAdam
+  - scheduler: CosineAnnealingLR
+
+name: qwen_vision_prefix
+load_pretrained_weights: true
+is_non_lora_ckpt: ${is_non_lora_ckpt}
+gradient_checkpointing: true
+# ZeRO-3 can trip PyTorch's non-reentrant checkpoint metadata check for Qwen's
+# dynamic visual token paths. Reentrant checkpointing is the safer memory-saving
+# default for this training setup; set false only when debugging that path.
+gradient_checkpointing_use_reentrant: true
+seq_parallelism_enabled: false
+tokenizer:
+  pretrained_model_name_or_path: Qwen/Qwen3.5-2B
+  use_fast: true
+
+net:
+  model_type: qwen3p5
+  num_of_feats_per_frame: 32
+  num_of_frames_per_sec: 2
+  vision_encoder_feat_reduction_factor: 1
+  train_vision: true
+  vision_encoder_channels: 64
+  is_lora_model: false
+  model:
+    pretrained_model_name_or_path: ${model.tokenizer.pretrained_model_name_or_path}
+  peft_config: null

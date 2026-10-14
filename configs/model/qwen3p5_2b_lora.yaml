@@ -1,0 +1,49 @@
+defaults:
+  - default
+
+name: qwen3p5_2b_lora
+gradient_checkpointing: true
+tokenizer:
+  pretrained_model_name_or_path: Qwen/Qwen3.5-2B
+  use_fast: true
+
+net:
+  model_type: qwen3p5
+  num_of_feats_per_frame: 32
+  num_of_frames_per_sec: 2
+  vision_encoder_feat_reduction_factor: 1
+  train_vision: false
+  vision_encoder_channels: 64
+  is_lora_model: true
+  model:
+    pretrained_model_name_or_path: ${model.tokenizer.pretrained_model_name_or_path}
+  action_head_config:
+    num_actions: 1
+  peft_config:
+    r: 32
+    lora_alpha: 16
+    lora_dropout: 0.05
+    target_modules:
+      - q_proj
+      - v_proj
+      - k_proj
+      - gate_proj
+      - up_proj
+      - down_proj
+      - in_proj_qkv
+      - in_proj_z
+      - in_proj_b
+      - in_proj_a
+      - out_proj
+
+# Interactive/action loss weights copied from streaming-vlms qwen3p5_2b_lora.
+criterion_action_weight: 250.0
+action_weight_warmup_steps: 1000
+action_positive_boost_cap: 1.0
+action_negative_only_weight: 1.0
+action_positive_token_weight: 3.0
+action_label_smoothing: 0.05
+action_bootstrap_beta: 0.9
+action_loss_clip: 2.0
+action_focal_alpha: 0.85
+action_focal_gamma: 2.0
